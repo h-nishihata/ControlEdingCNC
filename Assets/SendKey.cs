@@ -1,29 +1,44 @@
+using System;
 using UnityEngine;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
+using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
 
 
 public class SendKey : MonoBehaviour
 {
-   //[DllImport("user32.dll", CharSet = CharSet.Auto)]
-   //public static extern IntPtr GetActiveWindow();
-   //IntPtr hWnd;
+    #region NativeMethods
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
+    public static extern IntPtr GetActiveWindow();
 
-    public float count;
+    [DllImport("user32.dll", SetLastError = true)]
+    public extern static void SendInput(int nInputs, Input[] pInputs, int cbsize);
+
+    IntPtr hWnd;
+    #endregion
+
+    public string key = "{UP}";
+    public float count = 10f;
     bool flag;
 
     void Start()
     {
-        //hWnd = GetActiveWindow();
         UnityEngine.Application.runInBackground = true;
     }
 
     void Update()
     {
-        count += Time.deltaTime;
-        if ((count > 10f) && !flag)
+        if (count > 0f)
+            count -= Time.deltaTime;
+
+        if ((count <= 0f) && !flag)
         {
+            //hWnd = GetActiveWindow();
+            SendKeys.SendWait(key);
             flag = true;
-            SendKeys.SendWait("{UP}");
             Debug.Log("sent");
         }
     }
