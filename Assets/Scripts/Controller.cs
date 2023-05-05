@@ -34,7 +34,7 @@ public class Values
     }
 }
 
-public class SendKey : MonoBehaviour
+public class Controller : MonoBehaviour
 {
     public float count = 10f;
     //private float estimatedTime;
