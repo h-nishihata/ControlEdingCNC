@@ -1,11 +1,12 @@
 # ControlEdingCNC
 
-## 設定変更が必要な部分
+## EdingCNCの設定変更
 ### 1. インストール
 EdingCNCは、管理者権限で実行すると外部プログラムからのキーストロークを受け付けなくなる。\
 インストール時に「Start cnc.exe as administrator (Recommended)」のチェックを外しておく。\
-それでも解決しない場合、cnc.exeのプロパティを開いて、「Run this program as an administrator」のチェックを外してから実行する。
-
+![image00](images/image00.jpg)\
+それでも解決しない場合、cnc.exeのプロパティを開いて、「Run this program as an administrator」のチェックを外してから実行する。\
+![image01](images/image01.png)
 ### 2. スタート画面
 EdingCNC起動時の画面にスタートボタンがあり、バッチファイルから起動した場合に自動でクリックさせるのが難しいので、
 C:\CNC4.03\htmlにある「Start.htm」を開き、自動で画面遷移するように変更する。
