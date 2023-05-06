@@ -6,6 +6,7 @@ public class Values
     private float curYPos;
     private float nextXPos;
     private float nextYPos;
+
     private int feedRate;
     public float CurXPos
     {
@@ -37,11 +38,10 @@ public class Values
 public class Controller : MonoBehaviour
 {
     public float count = 10f;
-    //private float estimatedTime;
+    private float estimatedTime;
     bool flag;
 
     private bool zUp = false;
-    //TO DO: バッチファイル起動したEdingCNCをアクティブウィンドウにして,Startを押す.
     Values val = new Values();
 
     void Start()
@@ -75,37 +75,31 @@ public class Controller : MonoBehaviour
 
     void Update()
     {
+        /*
         if (count > 0f)
             count -= Time.deltaTime;
 
         if ((count <= 0f) && !flag)
         {
             this.SetNextCoord();
-            /*
-            // 移動にかかる時間を予測
-            var diff = Mathf.Abs(val.CurYPos - val.NextYPos);
-            estimatedTime = (diff * 60f) / val.FeedRate;
-            //Debug.Log(estimatedTime);
-            */
-            SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
             flag = true;
         }
-        /*
-        if (flag)
-        {
-            if (estimatedTime > 0f)
-            {
-                estimatedTime -= Time.deltaTime;
-                Debug.Log(estimatedTime);
-            }
-        }
-        */
+        */        
     }
 
-    private void SetNextCoord()
+    public void SetNextCoord(int xPos, int yPos, int feedRate)
     {
-        val.NextXPos = Random.Range(0f, 1150f);
+        val.NextXPos = xPos;
         val.NextYPos = Random.Range(0f, 2400f);
         val.FeedRate = Random.Range(300, 5400);
+        /*
+        // 移動にかかる時間を予測
+        var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurXPos, 2) + Mathf.Pow(val.NextYPos - val.CurYPos, 2));
+        estimatedTime = (dist * 60f) / val.FeedRate;
+        */
+        val.CurXPos = val.NextXPos;
+        val.CurYPos = val.NextYPos;
+        Debug.Log("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+        //SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
     }
 }
