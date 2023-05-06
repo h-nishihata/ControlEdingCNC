@@ -2,21 +2,22 @@
 using UnityEngine;
 public class Values
 {
-    private float curXPos;
-    private float curYPos;
+    private float currXPos;
+    private float currYPos;
     private float nextXPos;
     private float nextYPos;
-
     private int feedRate;
-    public float CurXPos
+    private bool zUp = false;
+
+    public float CurrXPos
     {
-        set { this.curXPos = value; }
-        get { return this.curXPos; }
+        set { this.currXPos = value; }
+        get { return this.currXPos; }
     }
-    public float CurYPos
+    public float CurrYPos
     {
-        set { this.curYPos = value; }
-        get { return this.curYPos; }
+        set { this.currYPos = value; }
+        get { return this.currYPos; }
     }
     public float NextXPos 
     {
@@ -37,12 +38,9 @@ public class Values
 
 public class Controller : MonoBehaviour
 {
-    public float count = 10f;
-    private float estimatedTime;
-    bool flag;
-
-    private bool zUp = false;
     Values val = new Values();
+    public ConsoleToGUI console;
+    private int numCommands;
 
     void Start()
     {
@@ -57,13 +55,13 @@ public class Controller : MonoBehaviour
         SendKeys.SendWait("{F1}");
         SendKeys.SendWait("{F2}");
         SendKeys.SendWait("{F8}");
-        val.CurXPos = 1100f;
-        val.CurYPos = 0f;
+        SendKeys.SendWait("{F12}");
+        val.CurrXPos = 1100f;
+        val.CurrYPos = 0f;
     }
 
     private void OpenMDI()
     {
-        SendKeys.SendWait("{F12}");
         SendKeys.SendWait("{F6}");
     }
     private void ClearMDI()
@@ -71,20 +69,6 @@ public class Controller : MonoBehaviour
         SendKeys.SendWait("^{A}");
         SendKeys.SendWait("{DELETE}");
         SendKeys.SendWait("{ENTER}");
-    }
-
-    void Update()
-    {
-        /*
-        if (count > 0f)
-            count -= Time.deltaTime;
-
-        if ((count <= 0f) && !flag)
-        {
-            this.SetNextCoord();
-            flag = true;
-        }
-        */        
     }
 
     public void SetNextCoord(int xPos, int yPos, int feedRate)
@@ -97,9 +81,20 @@ public class Controller : MonoBehaviour
         var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurXPos, 2) + Mathf.Pow(val.NextYPos - val.CurYPos, 2));
         estimatedTime = (dist * 60f) / val.FeedRate;
         */
-        val.CurXPos = val.NextXPos;
-        val.CurYPos = val.NextYPos;
+        val.CurrXPos = val.NextXPos;
+        val.CurrYPos = val.NextYPos;
+        
         Debug.Log("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+        if (numCommands < 10)
+        {
+            numCommands++;
+        }
+        else
+        {
+            console.ClearLog();
+            this.ClearMDI();
+            numCommands = 0;
+        }
         //SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
     }
 }
