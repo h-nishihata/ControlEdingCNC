@@ -23,8 +23,7 @@ public class OSCController : MonoBehaviour {
 	void Update () {
 		if(receiver.hasWaitingMessages()) {            
 			OSCMessage msg = receiver.getNextMessage();
-            if (msg.Address == "/eeg")
-                ReceiveMessages(msg.Data);
+            ReceiveMessages(msg.Data);
         }
     }
 	
@@ -34,14 +33,9 @@ public class OSCController : MonoBehaviour {
 
     private void ReceiveMessages(List<object> data) {
 		for(int i = 0; i < data.Count; i++) {
-            int num;
-            bool b = int.TryParse(data[i].ToString(), out num);
 
-            if (b)
-            {
-                //Debug.Log(num);
-                controller.SetNextCoord(num, 0, 0);
-            }
+            Debug.Log(data[0].ToString());
+            //controller.SetNextCoord(num, 0, 0);
 		}
 	}
 }
