@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Collections;
+using System.Windows.Forms;
 using UnityEngine;
 public class Values
 {
@@ -38,16 +39,17 @@ public class Values
 
 public class Controller : MonoBehaviour
 {
+    static private float yLimit = 2350f;
+    static private float xLimit = 1100f;
+
     Values val = new Values();
     public ConsoleToGUI console;
     private int numCommands;
 
     void Start()
     {
-        UnityEngine.Application.runInBackground = true;
-        //this.HomeAllAxis();
-        // ホーミング後
-        // this.OpenMDI();
+        UnityEngine.Application.runInBackground = true;        
+        StartCoroutine(WaitForHoming());        
     }
 
     private void HomeAllAxis()
@@ -56,8 +58,16 @@ public class Controller : MonoBehaviour
         SendKeys.SendWait("{F2}");
         SendKeys.SendWait("{F8}");
         SendKeys.SendWait("{F12}");
-        val.CurrXPos = 1100f;
+        val.CurrXPos = xLimit;
         val.CurrYPos = 0f;
+    }
+
+    private IEnumerator WaitForHoming()
+    {
+        yield return new WaitForSeconds(10f);
+        this.HomeAllAxis();
+        yield return new WaitForSeconds(10f);
+        this.OpenMDI();
     }
 
     private void OpenMDI()
@@ -71,30 +81,42 @@ public class Controller : MonoBehaviour
         SendKeys.SendWait("{ENTER}");
     }
 
-    public void SetNextCoord(int xPos, int yPos, int feedRate)
+    public void SetNextCoord(string xPos, string yPos, string xDir, string yDir, string feedRate)
     {
-        val.NextXPos = xPos;
-        val.NextYPos = Random.Range(0f, 2400f);
-        val.FeedRate = Random.Range(300, 5400);
+        val.NextXPos = float.Parse(xDir) > 10 ? val.CurrXPos + float.Parse(xPos) : val.CurrXPos - float.Parse(xPos);
+        val.NextYPos = float.Parse(yDir) > 10 ? val.CurrYPos + float.Parse(yPos) : val.CurrYPos - float.Parse(yPos);
+        val.FeedRate = (int)(float.Parse(feedRate) * 100);
+
+        if (val.NextXPos > xLimit)
+            val.NextXPos = val.CurrXPos - float.Parse(xPos);
+        if (val.NextYPos > yLimit)
+            val.NextYPos = val.CurrYPos - float.Parse(yPos);
+        if (val.NextXPos < 0)
+            val.NextXPos = val.CurrXPos + float.Parse(xPos);
+        if (val.NextYPos < 0)
+            val.NextYPos = val.CurrYPos + float.Parse(yPos);
+
         /*
         // 移動にかかる時間を予測
         var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurXPos, 2) + Mathf.Pow(val.NextYPos - val.CurYPos, 2));
         estimatedTime = (dist * 60f) / val.FeedRate;
         */
+
+        SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+        //Debug.Log("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+
         val.CurrXPos = val.NextXPos;
         val.CurrYPos = val.NextYPos;
-        
-        Debug.Log("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+
         if (numCommands < 10)
         {
             numCommands++;
         }
         else
         {
-            console.ClearLog();
+            //console.ClearLog();
             this.ClearMDI();
             numCommands = 0;
         }
-        //SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
     }
 }

@@ -23,7 +23,10 @@ public class OSCController : MonoBehaviour {
 	void Update () {
 		if(receiver.hasWaitingMessages()) {            
 			OSCMessage msg = receiver.getNextMessage();
-            ReceiveMessages(msg.Data);
+
+            // データ形式によって振り分け
+            var b = (msg.Address == "/eeg" || msg.Address == "/bandpower") ? true : false;
+            ReceiveMessages(msg.Data, b);
         }
     }
 	
@@ -31,11 +34,40 @@ public class OSCController : MonoBehaviour {
         handler.SendMessageToClient("Max", address, value);
     }
 
-    private void ReceiveMessages(List<object> data) {
-		for(int i = 0; i < data.Count; i++) {
+    private void ReceiveMessages(List<object> data, bool hasMultipleData) {
+        /*
+        送られてくるデータ形式
 
-            Debug.Log(data[0].ToString());
-            //controller.SetNextCoord(num, 0, 0);
-		}
+        /eeg
+            [0]EEG生データ（String、1データごとに「;」で分けられる） [1]タイムスタンプ（String）
+            例: "value0;value1;value2;value3;" "YYYY - MM - ddTHH:mm: ssZZZ"
+
+        /bandpower
+            [0]データ（String、1データごとに「;」で分けられる） [1]タイムスタンプ（String）
+            例: "alpha;beta;theta;delta;gamma" "YYYY - MM - ddTHH:mm: ssZZZ"
+
+        /attention
+            [0]attentionスコア (Float) [1]タイムスタンプ（String）
+            例: 100f "YYYY - MM - ddTHH:mm: ssZZZ"
+
+        /meditation
+            [0]meditationスコア (Float)　[1]タイムスタンプ （String）
+            例: 100f "YYYY - MM - ddTHH:mm: ssZZZ"
+        */
+
+        //bool hasMultipleData = data[0].ToString().Contains(";");
+        if (hasMultipleData)
+        {
+            string[] waves = data[0].ToString().Split("/");
+            controller.SetNextCoord(waves[0], waves[1], waves[2], waves[3], waves[4]);
+            //for (int i = 0; i < waves.Length; i++)
+                //Debug.Log(waves[i]);
+        }
+        else
+        {
+            //controller.SetNextCoord(data[0], 0, 0);
+            Debug.Log(data[0]);
+        }
+		
 	}
 }

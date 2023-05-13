@@ -37,7 +37,7 @@ public class ConsoleToGUI : MonoBehaviour
         }
     }
     //#endif
-
+    /*
     public void ClearLog()
     {
         var assembly = Assembly.GetAssembly(typeof(UnityEditor.Editor));
@@ -45,4 +45,5 @@ public class ConsoleToGUI : MonoBehaviour
         var method = type.GetMethod("Clear");
         method.Invoke(new object(), null);
     }
+    */
 }
