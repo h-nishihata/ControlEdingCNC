@@ -7,10 +7,11 @@ public class OSCController : MonoBehaviour {
 
     private OSCHandler handler;
     private OSCReceiver receiver;
-    private string address = "172.16.202.207";
-	private int sendPort = 7400;
-    public int receivePort = 6666;
+    private string address = "192.168.0.136";
+	private int sendPort = 8888;
+    public int receivePort = 8888;
     public Controller controller;
+    //public bool isSenderActive;
 
 	void Start () {
         handler = OSCHandler.Instance;
@@ -18,10 +19,13 @@ public class OSCController : MonoBehaviour {
         handler.transform.SetParent(gameObject.transform);
 		receiver = new OSCReceiver();
 		receiver.Open(receivePort);
-	}	
+
+        //if (isSenderActive)
+            //StartCoroutine(this.EmulateSender());
+    }	
 	
 	void Update () {
-		if(receiver.hasWaitingMessages()) {            
+		if(receiver.hasWaitingMessages()) {
 			OSCMessage msg = receiver.getNextMessage();
 
             // データ形式によって振り分け
@@ -29,8 +33,18 @@ public class OSCController : MonoBehaviour {
             ReceiveMessages(msg.Data, b);
         }
     }
-	
-    public void SendMessages(string address, float value) {
+    /*
+    private IEnumerator EmulateSender()
+    {
+        var cachedWait = new WaitForSeconds(1f);
+        while (true) // このGameObjectが有効な間は
+        {
+            this.SendMessages(address, "/bandpower ");
+            yield return cachedWait;
+        }
+    }
+    */
+    public void SendMessages(string address, string value) {
         handler.SendMessageToClient("Max", address, value);
     }
 
@@ -58,10 +72,10 @@ public class OSCController : MonoBehaviour {
         //bool hasMultipleData = data[0].ToString().Contains(";");
         if (hasMultipleData)
         {
-            string[] waves = data[0].ToString().Split("/");
-            controller.SetNextCoord(waves[0], waves[1], waves[2], waves[3], waves[4]);
-            //for (int i = 0; i < waves.Length; i++)
-                //Debug.Log(waves[i]);
+            string[] waves = data[0].ToString().Split(";");
+            //controller.SetNextCoord(waves[0], waves[1], waves[2], waves[3], waves[4]);
+            for (int i = 0; i < waves.Length; i++)
+                Debug.Log(waves[i]);
         }
         else
         {

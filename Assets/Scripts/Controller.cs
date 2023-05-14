@@ -8,7 +8,6 @@ public class Values
     private float nextXPos;
     private float nextYPos;
     private int feedRate;
-    private bool zUp = false;
 
     public float CurrXPos
     {
@@ -39,17 +38,19 @@ public class Values
 
 public class Controller : MonoBehaviour
 {
+    //private bool isReady;
     static private float yLimit = 2350f;
     static private float xLimit = 1100f;
 
     Values val = new Values();
+
     public ConsoleToGUI console;
     private int numCommands;
 
     void Start()
     {
         UnityEngine.Application.runInBackground = true;        
-        StartCoroutine(WaitForHoming());        
+        StartCoroutine(HomingProcess());        
     }
 
     private void HomeAllAxis()
@@ -62,17 +63,30 @@ public class Controller : MonoBehaviour
         val.CurrYPos = 0f;
     }
 
-    private IEnumerator WaitForHoming()
+    private IEnumerator HomingProcess()
     {
+        this.OpenMDI();
+        SendKeys.SendWait("M8" + "{ENTER}");
         yield return new WaitForSeconds(10f);
+
         this.HomeAllAxis();
         yield return new WaitForSeconds(10f);
+
         this.OpenMDI();
+        this.MoveToCenter();
     }
 
     private void OpenMDI()
     {
         SendKeys.SendWait("{F6}");
+    }
+
+    private void MoveToCenter()
+    {
+        SendKeys.SendWait("M8" + "{ENTER}");
+        SendKeys.SendWait("G0 X550 Y1175" + "{ENTER}");
+        //移動後に下ろす
+        //isReady = true;
     }
     private void ClearMDI()
     {
@@ -83,6 +97,9 @@ public class Controller : MonoBehaviour
 
     public void SetNextCoord(string xPos, string yPos, string xDir, string yDir, string feedRate)
     {
+        // if(!isReady)
+            // return;
+
         val.NextXPos = float.Parse(xDir) > 10 ? val.CurrXPos + float.Parse(xPos) : val.CurrXPos - float.Parse(xPos);
         val.NextYPos = float.Parse(yDir) > 10 ? val.CurrYPos + float.Parse(yPos) : val.CurrYPos - float.Parse(yPos);
         val.FeedRate = (int)(float.Parse(feedRate) * 100);
