@@ -29,7 +29,7 @@ public class OSCController : MonoBehaviour {
 			OSCMessage msg = receiver.getNextMessage();
 
             // データ形式によって振り分け
-            var b = (msg.Address == "/eeg" || msg.Address == "/bandpower") ? true : false;
+            var b = (msg.Address == "/EEG" || msg.Address == "/BandPower") ? true : false;
             ReceiveMessages(msg.Data, b);
         }
     }
@@ -73,9 +73,9 @@ public class OSCController : MonoBehaviour {
         if (hasMultipleData)
         {
             string[] waves = data[0].ToString().Split(";");
-            //controller.SetNextCoord(waves[0], waves[1], waves[2], waves[3], waves[4]);
-            for (int i = 0; i < waves.Length; i++)
-                Debug.Log(waves[i]);
+            controller.SetNextCoord(waves[0], waves[1], waves[2], waves[3], waves[4]);
+            //for (int i = 0; i < waves.Length; i++)
+                //Debug.Log(i + ": " + waves[i]);
         }
         else
         {
