@@ -39,11 +39,11 @@ public class Values
 public class Controller : MonoBehaviour
 {
     private bool isReady;
-    static private float yLimit = 2350f;
-    static private float xLimit = 1100f;
+    static private float xLimit = 1090f;
+    static private float yLimit = 2340f;
 
     Values val = new Values();
-
+    private float estimatedTime;
     public ConsoleToGUI console;
     private int numCommands;
 
@@ -52,7 +52,7 @@ public class Controller : MonoBehaviour
         UnityEngine.Application.runInBackground = true;        
         StartCoroutine(HomingProcess());        
     }
-
+#region EdingCNCFunctions
     private void HomeAllAxis()
     {
         SendKeys.SendWait("{F1}");
@@ -65,7 +65,7 @@ public class Controller : MonoBehaviour
 
     private IEnumerator HomingProcess()
     {        
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(10f);
 
         //this.OpenMDI();
         //SendKeys.SendWait("M8" + "{ENTER}");
@@ -92,13 +92,31 @@ public class Controller : MonoBehaviour
         isReady = true;
         val.CurrXPos = 550f;
         val.CurrYPos = 1175f;
-        Debug.Log("ready");
+        //Debug.Log("ready");
     }
     private void ClearMDI()
     {
         SendKeys.SendWait("^{A}");
         SendKeys.SendWait("{DELETE}");
         SendKeys.SendWait("{ENTER}");
+    }
+#endregion
+
+    private void Update()
+    {
+        /*
+        if(estimatedTime > 0f)
+        {
+            //Debug.Log("counting");
+            isReady = false;
+            estimatedTime -= Time.deltaTime;
+        }
+        else
+        {
+            isReady = true;
+            estimatedTime = 0f;
+        }
+        */
     }
 
     public void SetNextCoord(string xPos, string yPos, string xDir, string yDir, string feedRate)
@@ -109,8 +127,11 @@ public class Controller : MonoBehaviour
         var moveDistX = float.Parse(xPos) * 5f;
         var moveDistY = float.Parse(yPos) * 5f;
 
-        if(moveDistX >= 200f || moveDistY >= 200f)
+        if((moveDistX >= 200f) || (moveDistY >= 200f))
+        {
+            //Debug.Log("distX: " + moveDistX + "distY: " + moveDistY);
             return;
+        }
 
         val.NextXPos = float.Parse(xDir) > 0.5f ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
         val.NextYPos = float.Parse(yDir) > 0.5f ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
@@ -120,24 +141,24 @@ public class Controller : MonoBehaviour
             val.NextXPos = val.CurrXPos - moveDistX;
         if (val.NextYPos > yLimit)
             val.NextYPos = val.CurrYPos - moveDistY;
-        if (val.NextXPos < 0)
+        if (val.NextXPos < 10)
             val.NextXPos = val.CurrXPos + moveDistX;
-        if (val.NextYPos < 0)
+        if (val.NextYPos < 10)
             val.NextYPos = val.CurrYPos + moveDistY;
 
         /*
         // 移動にかかる時間を予測
-        var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurXPos, 2) + Mathf.Pow(val.NextYPos - val.CurYPos, 2));
-        estimatedTime = (dist * 60f) / val.FeedRate;
+        var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
+        estimatedTime = (dist * 600f) / val.FeedRate;
         */
-
+        //Debug.Log(estimatedTime);
         //Debug.Log("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
 
         val.CurrXPos = val.NextXPos;
         val.CurrYPos = val.NextYPos;
         //Debug.Log("X: " + val.CurrXPos + ", Y: " + val.CurrYPos);
 
-        if (numCommands < 20)
+        if (numCommands < 15)
         {
             numCommands++;
         }
