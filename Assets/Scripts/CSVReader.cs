@@ -14,6 +14,7 @@ public class CSVReader : MonoBehaviour
     public string fileName = "archiveData";
     private StringReader reader;
     private List<string> csvData = new List<string>(); // CSVファイルの中身を入れるリスト.
+    OSCController osc;
 
     void Awake()
     {
@@ -31,12 +32,16 @@ public class CSVReader : MonoBehaviour
         StartCoroutine(this.CSV2OSC());
     }
 
+    /// <summary>
+    /// 記録した脳波をCSVとして読み込み, TouchDesignerなどへ送信して波形にする.
+    /// </summary>
     private IEnumerator CSV2OSC()
     {
         var cachedWait = new WaitForSeconds(1f);
         for (int i = 0; i < csvData.Count; i++)
         {
-            Debug.Log(csvData[i]);
+            //osc.SendMessages("locakhost", "");
+            //Debug.Log(csvData[i]);
             yield return cachedWait;
         }
     }

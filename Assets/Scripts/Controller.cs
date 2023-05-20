@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Windows.Forms;
 using UnityEngine;
+
 public class Values
 {
     private float currXPos;
@@ -38,14 +39,17 @@ public class Values
 
 public class Controller : MonoBehaviour
 {
-    private bool isReady;
     static private float xLimit = 1090f;
     static private float yLimit = 2340f;
-
     Values val = new Values();
+
+    private bool isReady;
+    private int numCommands;
+
     private float estimatedTime;
     public ConsoleToGUI console;
-    private int numCommands;
+
+    bool b;
 
     void Start()
     {
@@ -86,14 +90,14 @@ public class Controller : MonoBehaviour
 
     private void MoveToCenter()
     {
-        SendKeys.SendWait("M8" + "{ENTER}");
+        //SendKeys.SendWait("M8" + "{ENTER}");
         SendKeys.SendWait("G0 X550 Y1175" + "{ENTER}");
-        //移動後に下ろす
+        //移動後にペン先を下ろす.
         isReady = true;
         val.CurrXPos = 550f;
         val.CurrYPos = 1175f;
-        //Debug.Log("ready");
     }
+
     private void ClearMDI()
     {
         SendKeys.SendWait("^{A}");
@@ -105,6 +109,7 @@ public class Controller : MonoBehaviour
     private void Update()
     {
         /*
+        // [TO DO] OSCを指定フレーム数分無視するのではなく、移動完了したら受け取るようにしたい.
         if(estimatedTime > 0f)
         {
             //Debug.Log("counting");
@@ -119,55 +124,102 @@ public class Controller : MonoBehaviour
         */
     }
 
-    public void SetNextCoord(string xPos, string yPos, string xDir, string yDir, string feedRate)
+    /// <summary>
+    /// /BandPowerを使って描く場合.
+    /// </summary>
+    /// <param name="xPos">α波をX座標に置換</param>
+    /// <param name="yPos">β波をY座標に置換</param>
+    /// <param name="xDir">θ波をX軸の方向に置換</param>
+    /// <param name="yDir">Δ波をY軸の方向に置換</param>
+    /// <param name="feedRate">Γ波をF値に置換</param>
+    public void DrawRandomLines(string xPos, string yPos, string xDir, string yDir, string feedRate)
     {
         if(!isReady)
             return;
-        
-        var moveDistX = float.Parse(xPos) * 5f;
-        var moveDistY = float.Parse(yPos) * 5f;
-
-        if((moveDistX >= 200f) || (moveDistY >= 200f))
-        {
-            //Debug.Log("distX: " + moveDistX + "distY: " + moveDistY);
-            return;
-        }
-
-        val.NextXPos = float.Parse(xDir) > 0.5f ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
-        val.NextYPos = float.Parse(yDir) > 0.5f ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
-        val.FeedRate = float.Parse(feedRate) < 0.1f ? (int)(float.Parse(feedRate) * 50000f) : 5000;
-
-        if (val.NextXPos > xLimit)
-            val.NextXPos = val.CurrXPos - moveDistX;
-        if (val.NextYPos > yLimit)
-            val.NextYPos = val.CurrYPos - moveDistY;
-        if (val.NextXPos < 10)
-            val.NextXPos = val.CurrXPos + moveDistX;
-        if (val.NextYPos < 10)
-            val.NextYPos = val.CurrYPos + moveDistY;
-
-        /*
-        // 移動にかかる時間を予測
-        var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
-        estimatedTime = (dist * 600f) / val.FeedRate;
-        */
-        //Debug.Log(estimatedTime);
-        //Debug.Log("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
-
-        val.CurrXPos = val.NextXPos;
-        val.CurrYPos = val.NextYPos;
-        //Debug.Log("X: " + val.CurrXPos + ", Y: " + val.CurrYPos);
 
         if (numCommands < 15)
+        {
+            // OSCが送られてくる頻度を調節.
+            numCommands++;
+        }
+        else
+        {
+            // 現在地から移動する量.
+            var moveDistX = float.Parse(xPos) > 40f ? 200f : float.Parse(xPos) * 5f;
+            var moveDistY = float.Parse(yPos) > 40f ? 200f : float.Parse(yPos) * 5f;
+
+            // +/-方向どちらに移動するかを決め, 次の座標として設定する.
+            val.NextXPos = float.Parse(xDir) > 0.5f ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
+            val.NextYPos = float.Parse(yDir) > 0.5f ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
+            val.FeedRate = float.Parse(feedRate) < 0.1f ? (int)(float.Parse(feedRate) * 50000f) : 5000;
+
+            this.CheckWorkAreaLimit(moveDistX, moveDistY);
+
+            /*
+            // 移動にかかる時間を予測.
+            var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
+            estimatedTime = (dist * 600f) / val.FeedRate;
+            */
+            
+            // MDIへキーストロークを送信.
+            SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+
+            val.CurrXPos = val.NextXPos;
+            val.CurrYPos = val.NextYPos;
+
+            numCommands = 0;
+            //this.ClearMDI();
+            //console.ClearLog();
+        }
+    }
+
+    /// <summary>
+    /// /Meditationを使って描く場合.
+    /// </summary>
+    /// <param name="meditationScore">リラックス度合</param>
+    public void VisualizeMeditation(string meditationScore)
+    {
+        if (numCommands < 7)
         {
             numCommands++;
         }
         else
         {
+            var score = float.Parse(meditationScore);
+            var moveDistX = score * 0.5f;
+            var moveDistY = (100 - score);
+            var feedRate = (int)((100 - score) * 50) + 2000;
+
+            val.NextXPos = b ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
+            val.NextYPos = val.CurrYPos + moveDistY;
+            val.FeedRate = feedRate;
+
+            //this.CheckWorkAreaLimit(moveDistX, moveDistY);
+
             SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
-            //console.ClearLog();
-            //this.ClearMDI();
+            //Debug.Log("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+            val.CurrXPos = val.NextXPos;
+            val.CurrYPos = val.NextYPos;
+
+            b = !b;
             numCommands = 0;
         }
+    }
+
+    /// <summary>
+    /// ワークエリアからはみ出さないように調節.
+    /// </summary>
+    /// <param name="distX">X方向の移動量</param>
+    /// <param name="distY">Y方向の移動量</param>
+    void CheckWorkAreaLimit(float distX, float distY)
+    {
+        if (val.NextXPos > xLimit)
+            val.NextXPos = val.CurrXPos - distX;
+        if (val.NextYPos > yLimit)
+            val.NextYPos = val.CurrYPos - distY;
+        if (val.NextXPos < 10)
+            val.NextXPos = val.CurrXPos + distX;
+        if (val.NextYPos < 10)
+            val.NextYPos = val.CurrYPos + distY;
     }
 }
