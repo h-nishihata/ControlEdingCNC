@@ -44,12 +44,14 @@ public class Controller : MonoBehaviour
     Values val = new Values();
 
     private bool isReady;
+    private bool isMoving;
     private int numCommands;
 
     private float estimatedTime;
     public ConsoleToGUI console;
 
-    bool b;
+    private bool xFlag, yFlag;
+    private float prevVal;
 
     void Start()
     {
@@ -78,6 +80,8 @@ public class Controller : MonoBehaviour
 
         this.HomeAllAxis();
         yield return new WaitForSeconds(10f);
+        // 最大で2'30"はかかる.        
+        //yield return new WaitForSeconds(180f);
 
         this.OpenMDI();
         this.MoveToCenter();
@@ -112,13 +116,12 @@ public class Controller : MonoBehaviour
         // [TO DO] OSCを指定フレーム数分無視するのではなく、移動完了したら受け取るようにしたい.
         if(estimatedTime > 0f)
         {
-            //Debug.Log("counting");
-            isReady = false;
+            isMoving = true;
             estimatedTime -= Time.deltaTime;
         }
         else
         {
-            isReady = true;
+            isMoving = false;
             estimatedTime = 0f;
         }
         */
@@ -156,9 +159,7 @@ public class Controller : MonoBehaviour
             this.CheckWorkAreaLimit(moveDistX, moveDistY);
 
             /*
-            // 移動にかかる時間を予測.
-            var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
-            estimatedTime = (dist * 600f) / val.FeedRate;
+
             */
             
             // MDIへキーストロークを送信.
@@ -179,31 +180,32 @@ public class Controller : MonoBehaviour
     /// <param name="meditationScore">リラックス度合</param>
     public void VisualizeMeditation(string meditationScore)
     {
-        if (numCommands < 7)
-        {
-            numCommands++;
-        }
-        else
-        {
-            var score = float.Parse(meditationScore);
-            var moveDistX = score * 0.5f;
-            var moveDistY = (100 - score);
-            var feedRate = (int)((100 - score) * 50) + 2000;
+        if (!isReady || isMoving)
+            return;
 
-            val.NextXPos = b ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
-            val.NextYPos = val.CurrYPos + moveDistY;
-            val.FeedRate = feedRate;
+        var score = float.Parse(meditationScore);
+        if(Mathf.Abs((int)score - (int)prevVal) < 1)
+            return;
 
-            //this.CheckWorkAreaLimit(moveDistX, moveDistY);
+        Debug.Log(score);
+        var moveDistX = score * score * 0.05f;
+        var moveDistY = (10000 - score * score) * 0.005f;
+        var feedRate = (int)((100 - score) * 120) + 2000;
 
-            SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
-            //Debug.Log("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
-            val.CurrXPos = val.NextXPos;
-            val.CurrYPos = val.NextYPos;
+        val.NextXPos = xFlag ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
+        val.NextYPos = yFlag ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
+        val.FeedRate = feedRate;
 
-            b = !b;
-            numCommands = 0;
-        }
+        // 移動にかかる時間を予測.
+        //var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
+        //estimatedTime = (dist * 60f) / val.FeedRate;
+        this.CheckWorkAreaLimit(moveDistX, moveDistY);
+
+        SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+        val.CurrXPos = val.NextXPos;
+        val.CurrYPos = val.NextYPos;
+        prevVal = score;
+        xFlag = !xFlag;      
     }
 
     /// <summary>
@@ -215,11 +217,14 @@ public class Controller : MonoBehaviour
     {
         if (val.NextXPos > xLimit)
             val.NextXPos = val.CurrXPos - distX;
-        if (val.NextYPos > yLimit)
-            val.NextYPos = val.CurrYPos - distY;
         if (val.NextXPos < 10)
             val.NextXPos = val.CurrXPos + distX;
-        if (val.NextYPos < 10)
-            val.NextYPos = val.CurrYPos + distY;
+
+        if (val.NextYPos > yLimit-10f || val.NextYPos < 10f)
+        {
+            val.NextXPos = Random.Range(20f, 990f);
+            val.NextYPos = val.CurrYPos;
+            yFlag = !yFlag;
+        }
     }
 }

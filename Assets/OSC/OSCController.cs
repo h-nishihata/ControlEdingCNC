@@ -57,7 +57,7 @@ public class OSCController : MonoBehaviour {
 
 #if USE_BANDPOWER
         string[] waves = data[0].ToString().Split(";");
-            controller.DrawRandomLines(waves[0], waves[1], waves[2], waves[3], waves[4]);
+        controller.DrawRandomLines(waves[0], waves[1], waves[2], waves[3], waves[4]);
             //for (int i = 0; i < waves.Length; i++)
                 //Debug.Log(i + ": " + waves[i]);
 #elif USE_MEDITATION
