@@ -39,32 +39,52 @@ public class Values
 
 public class Controller : MonoBehaviour
 {
-    static private float xLimit = 1090f;
+#region variables
+    static private float xLimit = 1090f; // ワークエリアの限界から10mm控えてある.
     static private float yLimit = 2340f;
     Values val = new Values();
 
     private bool isReady;
     private bool isMoving;
-    private int numCommands;
-
-    private float estimatedTime;
-    public ConsoleToGUI console;
-
-    private bool xFlag;
-    private bool yFlag = true;
     private float prevVal;
 
     public AnimationCurve curve;
+    private float moveDistX;
+    private float moveDistY;
+    private bool xFlag;
+    private bool yFlag = true;
+    private float estimatedTime;
+#endregion
 
     void Start()
     {
         UnityEngine.Application.runInBackground = true;        
-        StartCoroutine(HomingProcess());        
+        StartCoroutine(HomingProcess());     
     }
 #region EdingCNCFunctions
+    private IEnumerator HomingProcess()
+    {
+        // デバッグ用.本番はバッチファイルで遅延させる.
+        yield return new WaitForSeconds(10f);
+
+        // ホーミングの前にペン先を上げる？
+        //this.OpenMDI();
+        //SendKeys.SendWait("M8" + "{ENTER}");
+        //SendKeys.SendWait("{F12}");
+        //yield return new WaitForSeconds(10f);
+
+        this.HomeAllAxis();
+        yield return new WaitForSeconds(1f);
+        // 最大で2'30"はかかる.        
+        //yield return new WaitForSeconds(180f);
+
+        this.OpenMDI();
+        this.MoveToStartPos();
+    }
+
     private void HomeAllAxis()
     {
-        Debug.Log("Home all axis");
+        Debug.Log("Homing all axis...");
         SendKeys.SendWait("{F1}");
         SendKeys.SendWait("{F2}");
         SendKeys.SendWait("{F8}");
@@ -73,36 +93,15 @@ public class Controller : MonoBehaviour
         val.CurrYPos = 0f;
     }
 
-    private IEnumerator HomingProcess()
-    {
-        Debug.Log("Start homing process");
-        yield return new WaitForSeconds(10f);
-
-        //this.OpenMDI();
-        //SendKeys.SendWait("M8" + "{ENTER}");
-        //SendKeys.SendWait("{F12}");
-        //yield return new WaitForSeconds(10f);
-
-        this.HomeAllAxis();
-        yield return new WaitForSeconds(10f);
-        // 最大で2'30"はかかる.        
-        //yield return new WaitForSeconds(180f);
-
-        this.OpenMDI();
-        this.MoveToCenter();
-    }
-
     private void OpenMDI()
     {
-        Debug.Log("Open MDI");
         SendKeys.SendWait("{F6}");
     }
 
-    private void MoveToCenter()
+    private void MoveToStartPos()
     {
-        Debug.Log("Move finger to center");
         //SendKeys.SendWait("M8" + "{ENTER}");
-        SendKeys.SendWait("G1 X550 Y1175 F3200" + "{ENTER}");
+        SendKeys.SendWait("G1 X1000 Y10 F3200" + "{ENTER}");
         //移動後にペン先を下ろす.
         isReady = true;
         val.CurrXPos = 550f;
@@ -118,9 +117,8 @@ public class Controller : MonoBehaviour
 #endregion
 
     private void Update()
-    {
-        /*
-        // [TO DO] OSCを指定フレーム数分無視するのではなく、移動完了したら受け取るようにしたい.
+    {        
+        // 移動完了したら次のOSCを受け取る.
         if(estimatedTime > 0f)
         {
             isMoving = true;
@@ -130,12 +128,11 @@ public class Controller : MonoBehaviour
         {
             isMoving = false;
             estimatedTime = 0f;
-        }
-        */
+        }        
     }
 
     /// <summary>
-    /// /Meditationを使って描く場合.
+    /// 次の座標を計算し、MDIにキーストロークを送信する.
     /// </summary>
     /// <param name="meditationScore">リラックス度合</param>
     public void VisualizeMeditation(string meditationScore)
@@ -144,21 +141,21 @@ public class Controller : MonoBehaviour
             return;
 
         var score = float.Parse(meditationScore);
+
         // ヘッドセット未装着.
         if(Mathf.Abs((int)score - (int)prevVal) < 2)
             return;
 
-        var moveDistX = score * curve.Evaluate(score / 100) * 2f;
-        var moveDistY = 100 - (score * curve.Evaluate(score / 100)) * 0.5f;
-        var feedRate = (int)((10000 - score * score) * 0.8f) + 2000;
+        moveDistX = score * curve.Evaluate(score / 100) * 0.5f;
+        moveDistY = (100 - (score * curve.Evaluate(score / 100))) * 0.01f;
+        val.FeedRate = (int)(score * curve.Evaluate(score / 100)) * 100 + 1200;
 
         val.NextXPos = xFlag ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
         val.NextYPos = yFlag ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
-        val.FeedRate = feedRate;
 
         // 移動にかかる時間を予測.
-        //var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
-        //estimatedTime = (dist * 60f) / val.FeedRate;
+        var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
+        estimatedTime = (dist * 100f) / val.FeedRate;
         this.CheckWorkAreaLimit(moveDistX, moveDistY);
 
         SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
@@ -166,7 +163,7 @@ public class Controller : MonoBehaviour
         val.CurrXPos = val.NextXPos;
         val.CurrYPos = val.NextYPos;
         prevVal = score;
-        xFlag = !xFlag;      
+        xFlag = !xFlag;
     }
 
     /// <summary>
@@ -181,7 +178,7 @@ public class Controller : MonoBehaviour
         if (val.NextXPos < 10)
             val.NextXPos = val.CurrXPos + distX;
 
-        if (val.NextYPos > yLimit-10f || val.NextYPos < 10f)
+        if (val.NextYPos > yLimit || val.NextYPos < 10f)
         {
             val.NextXPos = Random.Range(20f, 990f);
             val.NextYPos = val.CurrYPos;
