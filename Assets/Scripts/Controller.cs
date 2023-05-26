@@ -54,6 +54,7 @@ public class Controller : MonoBehaviour
     private bool xFlag;
     private bool yFlag = true;
     private float estimatedTime;
+    private int countToClearMDI;
 #endregion
 
     void Start()
@@ -100,12 +101,12 @@ public class Controller : MonoBehaviour
 
     private void MoveToStartPos()
     {
-        //SendKeys.SendWait("M8" + "{ENTER}");
         SendKeys.SendWait("G1 X1000 Y10 F3200" + "{ENTER}");
         //移動後にペン先を下ろす.
         isReady = true;
-        val.CurrXPos = 550f;
-        val.CurrYPos = 1175f;
+        val.CurrXPos = 1000f;
+        val.CurrYPos = 10f;
+        Debug.Log("Ready");
     }
 
     private void ClearMDI()
@@ -146,24 +147,31 @@ public class Controller : MonoBehaviour
         if(Mathf.Abs((int)score - (int)prevVal) < 2)
             return;
 
-        moveDistX = score * curve.Evaluate(score / 100) * 0.5f;
-        moveDistY = (100 - (score * curve.Evaluate(score / 100))) * 0.01f;
-        val.FeedRate = (int)(score * curve.Evaluate(score / 100)) * 100 + 1200;
+        moveDistX = score * curve.Evaluate(score / 100) * 5f;
+        moveDistY = (100 - (score * curve.Evaluate(score / 100))) * 0.1f;
+        val.FeedRate = (int)(score * curve.Evaluate(score / 100)) * 500 + 1200;
 
         val.NextXPos = xFlag ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
         val.NextYPos = yFlag ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
 
-        // 移動にかかる時間を予測.
+        // 移動にかかる時間を予測 (重い、、orz).
         var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
         estimatedTime = (dist * 100f) / val.FeedRate;
         this.CheckWorkAreaLimit(moveDistX, moveDistY);
 
         SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
         
-        val.CurrXPos = val.NextXPos;
-        val.CurrYPos = val.NextYPos;
         prevVal = score;
         xFlag = !xFlag;
+        val.CurrXPos = val.NextXPos;
+        val.CurrYPos = val.NextYPos;
+        if(countToClearMDI < 19)
+            countToClearMDI++;
+        else
+        {
+            this.ClearMDI();
+            countToClearMDI = 0;
+        }
     }
 
     /// <summary>
