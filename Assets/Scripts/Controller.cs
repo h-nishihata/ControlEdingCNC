@@ -50,8 +50,11 @@ public class Controller : MonoBehaviour
     private float estimatedTime;
     public ConsoleToGUI console;
 
-    private bool xFlag, yFlag;
+    private bool xFlag;
+    private bool yFlag = true;
     private float prevVal;
+
+    public AnimationCurve curve;
 
     void Start()
     {
@@ -61,6 +64,7 @@ public class Controller : MonoBehaviour
 #region EdingCNCFunctions
     private void HomeAllAxis()
     {
+        Debug.Log("Home all axis");
         SendKeys.SendWait("{F1}");
         SendKeys.SendWait("{F2}");
         SendKeys.SendWait("{F8}");
@@ -70,7 +74,8 @@ public class Controller : MonoBehaviour
     }
 
     private IEnumerator HomingProcess()
-    {        
+    {
+        Debug.Log("Start homing process");
         yield return new WaitForSeconds(10f);
 
         //this.OpenMDI();
@@ -89,13 +94,15 @@ public class Controller : MonoBehaviour
 
     private void OpenMDI()
     {
+        Debug.Log("Open MDI");
         SendKeys.SendWait("{F6}");
     }
 
     private void MoveToCenter()
     {
+        Debug.Log("Move finger to center");
         //SendKeys.SendWait("M8" + "{ENTER}");
-        SendKeys.SendWait("G0 X550 Y1175" + "{ENTER}");
+        SendKeys.SendWait("G1 X550 Y1175 F3200" + "{ENTER}");
         //移動後にペン先を下ろす.
         isReady = true;
         val.CurrXPos = 550f;
@@ -128,53 +135,6 @@ public class Controller : MonoBehaviour
     }
 
     /// <summary>
-    /// /BandPowerを使って描く場合.
-    /// </summary>
-    /// <param name="xPos">α波をX座標に置換</param>
-    /// <param name="yPos">β波をY座標に置換</param>
-    /// <param name="xDir">θ波をX軸の方向に置換</param>
-    /// <param name="yDir">Δ波をY軸の方向に置換</param>
-    /// <param name="feedRate">Γ波をF値に置換</param>
-    public void DrawRandomLines(string xPos, string yPos, string xDir, string yDir, string feedRate)
-    {
-        if(!isReady)
-            return;
-
-        if (numCommands < 15)
-        {
-            // OSCが送られてくる頻度を調節.
-            numCommands++;
-        }
-        else
-        {
-            // 現在地から移動する量.
-            var moveDistX = float.Parse(xPos) > 40f ? 200f : float.Parse(xPos) * 5f;
-            var moveDistY = float.Parse(yPos) > 40f ? 200f : float.Parse(yPos) * 5f;
-
-            // +/-方向どちらに移動するかを決め, 次の座標として設定する.
-            val.NextXPos = float.Parse(xDir) > 0.5f ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
-            val.NextYPos = float.Parse(yDir) > 0.5f ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
-            val.FeedRate = float.Parse(feedRate) < 0.1f ? (int)(float.Parse(feedRate) * 50000f) : 5000;
-
-            this.CheckWorkAreaLimit(moveDistX, moveDistY);
-
-            /*
-
-            */
-            
-            // MDIへキーストロークを送信.
-            SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
-
-            val.CurrXPos = val.NextXPos;
-            val.CurrYPos = val.NextYPos;
-
-            numCommands = 0;
-            //this.ClearMDI();
-            //console.ClearLog();
-        }
-    }
-
-    /// <summary>
     /// /Meditationを使って描く場合.
     /// </summary>
     /// <param name="meditationScore">リラックス度合</param>
@@ -184,13 +144,13 @@ public class Controller : MonoBehaviour
             return;
 
         var score = float.Parse(meditationScore);
-        if(Mathf.Abs((int)score - (int)prevVal) < 1)
+        // ヘッドセット未装着.
+        if(Mathf.Abs((int)score - (int)prevVal) < 2)
             return;
 
-        Debug.Log(score);
-        var moveDistX = score * score * 0.05f;
-        var moveDistY = (10000 - score * score) * 0.005f;
-        var feedRate = (int)((100 - score) * 120) + 2000;
+        var moveDistX = score * curve.Evaluate(score / 100) * 2f;
+        var moveDistY = 100 - (score * curve.Evaluate(score / 100)) * 0.5f;
+        var feedRate = (int)((10000 - score * score) * 0.8f) + 2000;
 
         val.NextXPos = xFlag ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
         val.NextYPos = yFlag ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
@@ -202,6 +162,7 @@ public class Controller : MonoBehaviour
         this.CheckWorkAreaLimit(moveDistX, moveDistY);
 
         SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
+        
         val.CurrXPos = val.NextXPos;
         val.CurrYPos = val.NextYPos;
         prevVal = score;

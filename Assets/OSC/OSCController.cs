@@ -1,7 +1,4 @@
-﻿#undef USE_BANDPOWER
-#define USE_MEDITATION
-
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityOSC;
@@ -36,7 +33,7 @@ public class OSCController : MonoBehaviour {
 
     private void ReceiveMessages(List<object> data) {
         /*
-        送られてくるデータ形式
+        送られてくるデータ形式(今回使用するのは/Attention).
 
         /EEG
             [0]EEG生データ（String、1データごとに「;」で分けられる） [1]タイムスタンプ（String）
@@ -55,14 +52,6 @@ public class OSCController : MonoBehaviour {
             例: 100f "YYYY - MM - ddTHH:mm: ssZZZ"
         */
 
-#if USE_BANDPOWER
-        string[] waves = data[0].ToString().Split(";");
-        controller.DrawRandomLines(waves[0], waves[1], waves[2], waves[3], waves[4]);
-            //for (int i = 0; i < waves.Length; i++)
-                //Debug.Log(i + ": " + waves[i]);
-#elif USE_MEDITATION
         controller.VisualizeMeditation(data[0].ToString());
-        //Debug.Log(data[0]);
-#endif
 	}
 }
