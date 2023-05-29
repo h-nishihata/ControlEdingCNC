@@ -49,6 +49,7 @@ public class Controller : MonoBehaviour
     private float prevVal;
 
     public AnimationCurve curve;
+    public AnimationCurve yCurve;
     private float moveDistX;
     private float moveDistY;
     private bool xFlag;
@@ -75,7 +76,7 @@ public class Controller : MonoBehaviour
         //yield return new WaitForSeconds(10f);
 
         this.HomeAllAxis();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(10f);
         // 最大で2'30"はかかる.        
         //yield return new WaitForSeconds(180f);
 
@@ -147,9 +148,9 @@ public class Controller : MonoBehaviour
         if(Mathf.Abs((int)score - (int)prevVal) < 2)
             return;
 
-        moveDistX = score * curve.Evaluate(score / 100) * 5f;
-        moveDistY = (100 - (score * curve.Evaluate(score / 100))) * 0.1f;
-        val.FeedRate = (int)(score * curve.Evaluate(score / 100)) * 500 + 1200;
+        moveDistX = score * curve.Evaluate(score / 100) * 3f;
+        moveDistY = (score * yCurve.Evaluate(score / 100));
+        val.FeedRate = (int)(score * curve.Evaluate(score / 100)) * 300 + 200;
 
         val.NextXPos = xFlag ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
         val.NextYPos = yFlag ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
