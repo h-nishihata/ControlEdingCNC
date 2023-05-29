@@ -48,7 +48,7 @@ public class Controller : MonoBehaviour
     private bool isMoving;
     private float prevVal;
 
-    public AnimationCurve curve;
+    public AnimationCurve xCurve;
     public AnimationCurve yCurve;
     private float moveDistX;
     private float moveDistY;
@@ -66,7 +66,7 @@ public class Controller : MonoBehaviour
 #region EdingCNCFunctions
     private IEnumerator HomingProcess()
     {
-        // デバッグ用.本番はバッチファイルで遅延させる.
+        // 本番はUnityアプリ → Edingの順で、バッチファイルで遅延させて立ち上げるので、その分(+余裕を持たせて)待機する.
         yield return new WaitForSeconds(10f);
 
         // ホーミングの前にペン先を上げる？
@@ -148,17 +148,17 @@ public class Controller : MonoBehaviour
         if(Mathf.Abs((int)score - (int)prevVal) < 2)
             return;
 
-        moveDistX = score * curve.Evaluate(score / 100) * 3f;
+        moveDistX = score * xCurve.Evaluate(score / 100) * 3f;
         moveDistY = (score * yCurve.Evaluate(score / 100));
-        val.FeedRate = (int)(score * curve.Evaluate(score / 100)) * 300 + 200;
+        val.FeedRate = (int)(score * xCurve.Evaluate(score / 100)) * 300 + 500;
 
         val.NextXPos = xFlag ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
         val.NextYPos = yFlag ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
+        this.CheckWorkAreaLimit(moveDistX, moveDistY);
 
         // 移動にかかる時間を予測 (重い、、orz).
         var dist = Mathf.Sqrt(Mathf.Pow(val.NextXPos - val.CurrXPos, 2) + Mathf.Pow(val.NextYPos - val.CurrYPos, 2));
         estimatedTime = (dist * 100f) / val.FeedRate;
-        this.CheckWorkAreaLimit(moveDistX, moveDistY);
 
         SendKeys.SendWait("G1 X" + val.NextXPos.ToString() + " Y" + val.NextYPos.ToString() + " F" + val.FeedRate.ToString() + "{ENTER}");
         
@@ -187,10 +187,17 @@ public class Controller : MonoBehaviour
         if (val.NextXPos < 10)
             val.NextXPos = val.CurrXPos + distX;
 
-        if (val.NextYPos > yLimit || val.NextYPos < 10f)
+        if (val.NextYPos > yLimit)
         {
-            val.NextXPos = Random.Range(20f, 990f);
-            val.NextYPos = val.CurrYPos;
+            val.NextXPos = Random.range(20f, 990f);
+            val.NextYPos = yLimit;
+            yFlag = !yFlag;
+        }
+
+        if (val.NextYPos < 10f)
+        {
+            val.NextXPos = Random.range(20f, 990f);
+            val.NextYPos = 10f;
             yFlag = !yFlag;
         }
     }

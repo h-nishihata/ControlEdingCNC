@@ -291,12 +291,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c5d121d0f886894b9bf355a1313f48e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  curve:
+  xCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0.015001103
-      value: 0.026078794
+      time: 0
+      value: 0
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -304,31 +304,31 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 0.38500643
-      value: 0.07769609
-      inSlope: 0.45808536
-      outSlope: 0.45808536
+      time: 0.38147685
+      value: 0.07280001
+      inSlope: 0.633612
+      outSlope: 0.633612
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0
-      outWeight: 0.3615512
+      inWeight: 0.33333334
+      outWeight: 0.1998533
     - serializedVersion: 3
-      time: 0.6674792
-      value: 0.8945585
-      inSlope: 0.8100037
-      outSlope: 0.8100037
+      time: 0.6629057
+      value: 0.8979807
+      inSlope: 1.1586719
+      outSlope: 1.1586719
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.20106785
-      outWeight: 0.28573778
+      inWeight: 0.33333334
+      outWeight: 0.19352563
     - serializedVersion: 3
-      time: 1.04
-      value: 0.9861264
-      inSlope: 0.046244923
-      outSlope: 0.046244923
+      time: 1
+      value: 1
+      inSlope: 0.032904595
+      outSlope: 0.032904595
       tangentMode: 0
       weightedMode: 0
-      inWeight: 1
+      inWeight: 0.19857912
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -346,8 +346,8 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.48571116
     - serializedVersion: 3
-      time: 0.34981748
-      value: 6.5688543
+      time: 0.3434851
+      value: 7.316792
       inSlope: -24.582495
       outSlope: -24.582495
       tangentMode: 0
@@ -355,7 +355,7 @@ MonoBehaviour:
       inWeight: 0.29530522
       outWeight: 0.016131196
     - serializedVersion: 3
-      time: 0.5700748
+      time: 0.5427005
       value: 0.33305693
       inSlope: -2.2282023
       outSlope: -2.2282023
