@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Reflection;
 
-public class ConsoleToGUI : MonoBehaviour
+public class Console2GameView : MonoBehaviour
 {
     //#if !UNITY_EDITOR
     static string myLog = "";

@@ -150,7 +150,7 @@ public class Controller : MonoBehaviour
 
         moveDistX = score * xCurve.Evaluate(score / 100) * 3f;
         moveDistY = (score * yCurve.Evaluate(score / 100));
-        val.FeedRate = (int)(score * xCurve.Evaluate(score / 100)) * 300 + 500;
+        val.FeedRate = (int)(score * xCurve.Evaluate(score / 100)) * 500 + 1200;
 
         val.NextXPos = xFlag ? val.CurrXPos + moveDistX : val.CurrXPos - moveDistX;
         val.NextYPos = yFlag ? val.CurrYPos + moveDistY : val.CurrYPos - moveDistY;
@@ -189,14 +189,14 @@ public class Controller : MonoBehaviour
 
         if (val.NextYPos > yLimit)
         {
-            val.NextXPos = Random.range(20f, 990f);
+            val.NextXPos = Random.Range(20f, 990f);
             val.NextYPos = yLimit;
             yFlag = !yFlag;
         }
 
         if (val.NextYPos < 10f)
         {
-            val.NextXPos = Random.range(20f, 990f);
+            val.NextXPos = Random.Range(20f, 990f);
             val.NextYPos = 10f;
             yFlag = !yFlag;
         }
