@@ -215,52 +215,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &736800747
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 736800749}
-  - component: {fileID: 736800750}
-  m_Layer: 0
-  m_Name: OSC Controller
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &736800749
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 736800747}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &736800750
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 736800747}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 96eeb9408a85646b0b0568481133bc0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  receivePort: 8888
-  controller: {fileID: 1070211615}
 --- !u!1 &1070211614
 GameObject:
   m_ObjectHideFlags: 0
@@ -270,111 +224,15 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1070211616}
-  - component: {fileID: 1070211615}
+  - component: {fileID: 1070211618}
   - component: {fileID: 1070211617}
   m_Layer: 0
-  m_Name: Live Wave Generator
+  m_Name: CNCController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1070211615
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1070211614}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c5d121d0f886894b9bf355a1313f48e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  xCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.38147685
-      value: 0.07280001
-      inSlope: 0.633612
-      outSlope: 0.633612
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.1998533
-    - serializedVersion: 3
-      time: 0.6629057
-      value: 0.8979807
-      inSlope: 1.1586719
-      outSlope: 1.1586719
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.19352563
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0.032904595
-      outSlope: 0.032904595
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.19857912
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  yCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0.0028143302
-      value: 10.04052
-      inSlope: 0.043524947
-      outSlope: 0.043524947
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.48571116
-    - serializedVersion: 3
-      time: 0.3434851
-      value: 7.316792
-      inSlope: -24.582495
-      outSlope: -24.582495
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.29530522
-      outWeight: 0.016131196
-    - serializedVersion: 3
-      time: 0.5427005
-      value: 0.33305693
-      inSlope: -2.2282023
-      outSlope: -2.2282023
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 1
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1.025
-      value: 0.034392513
-      inSlope: -0.040458743
-      outSlope: -0.040458743
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.34375522
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!4 &1070211616
 Transform:
   m_ObjectHideFlags: 0
@@ -400,5 +258,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c9b26388279c01438bb9b16080dc1e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1070211618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1070211614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a113e0fe25d81147b62d6dd8e74a880, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 

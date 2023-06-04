@@ -37,7 +37,7 @@ public class Values
     }
 }
 
-public class Controller : MonoBehaviour
+public class LiveWaveGenerator : MonoBehaviour
 {
 #region variables
     static private float xLimit = 1090f; // ワークエリアの限界から10mm控えてある.

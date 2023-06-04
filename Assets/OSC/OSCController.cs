@@ -10,7 +10,7 @@ public class OSCController : MonoBehaviour {
     private string address = "192.168.0.136";
 	private int sendPort = 8888;
     public int receivePort = 8888;
-    public Controller controller;
+    public LiveWaveGenerator controller;
 
 	void Start () {
         handler = OSCHandler.Instance;
