@@ -5,12 +5,10 @@ using UnityEngine;
 
 public class CNCController : MonoBehaviour
 {
-    #region variables
     public string fileName = "test.gcode";
-    private bool isReady;
-    private bool isMoving;
-    private int countToClearMDI;
-#endregion
+    public int waitForEding = 60;
+    public int waitForHoming = 60;
+    public int waitForLoading = 10;
     void Start()
     {
         UnityEngine.Application.runInBackground = true;
@@ -21,20 +19,13 @@ public class CNCController : MonoBehaviour
     {
         // 本番はUnityアプリ → Edingの順で、バッチファイルで遅延させて立ち上げるので、その分(+余裕を持たせて)待機する.
         Debug.Log(DateTime.Now.ToString("dd-MM-yyyy-HH-mm-ss") + ": Wainting for EdingCNC to start up...");
-        yield return new WaitForSeconds(10f);
-
-        // ホーミングの前にペン先を上げる？
-        //this.OpenMDI();
-        //SendKeys.SendWait("M8" + "{ENTER}");
-        //SendKeys.SendWait("{F12}");
-        //yield return new WaitForSeconds(10f);
+        yield return new WaitForSeconds(waitForEding);
 
         this.HomeAllAxis();
-        yield return new WaitForSeconds(10f);
-        // 最大で2'30"はかかる.        
-        //yield return new WaitForSeconds(180f);
+        yield return new WaitForSeconds(waitForHoming);
 
         this.LoadGCode();
+        yield return new WaitForSeconds(waitForLoading);
         this.StartDrawing();
     }
 
@@ -75,8 +66,4 @@ public class CNCController : MonoBehaviour
         SendKeys.SendWait("{ENTER}");
     }
     #endregion
-
-    private void Update()
-    {
-    }
 }

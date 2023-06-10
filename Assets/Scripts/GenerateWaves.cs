@@ -25,14 +25,12 @@ public class GenerateWaves : MonoBehaviour
 
     private void Update()
     {
-        /*
         if(Input.GetKeyDown(KeyCode.Space) && !keyPressed)
         {
             this.Reset();
             this.DrawWave();
             keyPressed = false;
         }
-        */
     }
 
     private void DrawWave()
@@ -40,7 +38,7 @@ public class GenerateWaves : MonoBehaviour
         for(int i = 0; i < numVertices; i++)
         {
             var score = Random.Range(0f, 100f);
-            var moveDistX = score * xCurve.Evaluate(score / 100) * 0.01f;
+            var moveDistX = score * xCurve.Evaluate(score / 100) * 0.015f;
             var moveDistY = 1f;
 
             nextXPos = xFlag ? currXPos + moveDistX : currXPos - moveDistX;
