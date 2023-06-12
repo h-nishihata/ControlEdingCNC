@@ -9,12 +9,14 @@ public class CNCController : MonoBehaviour
     public int waitForEding = 60;
     public int waitForHoming = 60;
     public int waitForLoading = 10;
+    public int count2Quit = 30;
+
     void Start()
     {
         UnityEngine.Application.runInBackground = true;
         StartCoroutine(HomingProcess());
     }
-    #region EdingCNCFunctions
+
     private IEnumerator HomingProcess()
     {
         // 本番はUnityアプリ → Edingの順で、バッチファイルで遅延させて立ち上げるので、その分(+余裕を持たせて)待機する.
@@ -26,7 +28,10 @@ public class CNCController : MonoBehaviour
 
         this.LoadGCode();
         yield return new WaitForSeconds(waitForLoading);
+
         this.StartDrawing();
+        yield return new WaitForSeconds(count2Quit);
+        UnityEngine.Application.Quit();
     }
 
     private void HomeAllAxis()
@@ -53,17 +58,4 @@ public class CNCController : MonoBehaviour
         SendKeys.SendWait("{F4}");
         Debug.Log(DateTime.Now.ToString("dd-MM-yyyy-HH-mm-ss") + ": Start Drawing !!");
     }
-
-    private void OpenMDI()
-    {
-        SendKeys.SendWait("{F6}");
-    }
-
-    private void ClearMDI()
-    {
-        SendKeys.SendWait("^{A}");
-        SendKeys.SendWait("{DELETE}");
-        SendKeys.SendWait("{ENTER}");
-    }
-    #endregion
 }
